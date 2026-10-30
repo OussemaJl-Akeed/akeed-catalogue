@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Catalogue Bornes & TPE - Akeed</title>
+  
+  <!-- Logo Akeed f Titre de Page (Favicon) -->
+  <link rel="icon" type="image/png" href="img/Akeed_Logo-Trans.png">
+
+  <style>
+    :root {
+      --primary: #0066cc;
+      --primary-dark: #004999;
+      --bg-dark: #0f172a;
+      --card-bg: #1e293b;
+      --text-light: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+      padding: 1rem 0;
+    }
+
+    header {
+      text-align: center;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    .logo {
+      width: clamp(120px, 18vw, 220px);
+      height: auto;
+      margin-bottom: 0.8rem;
+    }
+
+    header h1 {
+      font-size: clamp(1.4rem, 4vw, 2.5rem);
+      color: var(--primary);
+      margin-bottom: 0.3rem;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: clamp(0.85rem, 2vw, 1.1rem);
+    }
+
+    /* Carousel Responsive Container */
+    .carousel-container {
+      position: relative;
+      width: 100%;
+      max-width: 1200px;
+      height: clamp(360px, 55vh, 500px);
+      margin: 1.5rem auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      perspective: 1000px;
+      touch-action: pan-y;
+      user-select: none;
+    }
+
+    .carousel-track {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .card {
+      position: absolute;
+      width: clamp(230px, 30vw, 300px);
+      height: clamp(340px, 48vh, 430px);
+      background: var(--card-bg);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.2rem;
+      transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease, z-index 0.4s ease;
+      cursor: grab;
+    }
+
+    .card:active {
+      cursor: grabbing;
+    }
+
+    .card img {
+      width: 100%;
+      height: clamp(140px, 22vh, 200px);
+      object-fit: contain;
+      border-radius: 8px;
+      margin-bottom: 0.8rem;
+      pointer-events: none;
+      background: #ffffff;
+      padding: 5px;
+    }
+
+    .card h3 {
+      font-size: clamp(0.9rem, 1.8vw, 1.1rem);
+      text-align: center;
+      margin-bottom: auto;
+      color: var(--text-light);
+    }
+
+    .btn-detail {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: clamp(0.8rem, 1.5vw, 0.95rem);
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+      margin-top: 0.8rem;
+    }
+
+    .btn-detail:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    /* Modal Responsive Styling */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      z-index: 1000;
+      padding: 1rem;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      width: 92%;
+      max-width: 550px;
+      border-radius: 16px;
+      padding: 1.5rem;
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      transform: scale(0.8);
+      transition: transform 0.3s ease;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: scale(1);
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 0.8rem;
+      right: 1rem;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.8rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+
+    .close-btn:hover {
+      color: #ff4d4d;
+    }
+
+    .modal-title {
+      font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+      color: var(--primary);
+      margin-bottom: 1rem;
+      padding-right: 2rem;
+    }
+
+    .modal-body {
+      font-size: clamp(0.85rem, 1.8vw, 0.95rem);
+      line-height: 1.6;
+      color: #cbd5e1;
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+
+    .modal-body ul {
+      padding-left: 1.2rem;
+      margin-top: 0.5rem;
+    }
+
+    /* Akeed Section Responsive */
+    .akeed-section {
+      width: 90%;
+      max-width: 900px;
+      background: rgba(30, 41, 59, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin: 2rem auto;
+      text-align: center;
+    }
+
+    .akeed-section h2 {
+      color: var(--primary);
+      margin-bottom: 0.8rem;
+      font-size: clamp(1.2rem, 3vw, 1.6rem);
+    }
+
+    .akeed-section p {
+      line-height: 1.6;
+      color: #cbd5e1;
+      margin-bottom: 1.2rem;
+      font-size: clamp(0.85rem, 1.8vw, 1rem);
+    }
+
+    .akeed-section a {
+      display: inline-block;
+      background: transparent;
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      padding: 0.5rem 1.2rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: clamp(0.85rem, 1.8vw, 0.95rem);
+      transition: all 0.3s ease;
+    }
+
+    .akeed-section a:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    /* Écran de Veille (Screensaver) Responsive */
+    .screensaver {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.96);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.5s ease;
+      cursor: pointer;
+    }
+
+    .screensaver.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .screensaver-content {
+      text-align: center;
+      padding: 1rem;
+    }
+
+    .screensaver-logo {
+      width: clamp(180px, 40vw, 320px);
+      height: auto;
+      animation: crazyAnimation 4s infinite ease-in-out;
+    }
+
+    .screensaver-text {
+      margin-top: 1.5rem;
+      color: var(--text-muted);
+      font-size: clamp(0.9rem, 2vw, 1.2rem);
+      letter-spacing: 2px;
+      animation: pulseText 2s infinite ease-in-out;
+    }
+
+    @keyframes crazyAnimation {
+      0% {
+        transform: scale(0.6) rotate(0deg) translateY(0);
+        filter: drop-shadow(0 0 10px rgba(0, 102, 204, 0.3));
+      }
+      25% {
+        transform: scale(1.1) rotate(180deg) translateY(-15px);
+        filter: drop-shadow(0 0 30px rgba(0, 102, 204, 0.8));
+      }
+      50% {
+        transform: scale(0.85) rotate(360deg) translateY(0);
+        filter: drop-shadow(0 0 15px rgba(0, 102, 204, 0.5));
+      }
+      75% {
+        transform: scale(1.2) rotate(540deg) translateY(15px);
+        filter: drop-shadow(0 0 35px rgba(0, 102, 204, 0.9));
+      }
+      100% {
+        transform: scale(0.6) rotate(720deg) translateY(0);
+        filter: drop-shadow(0 0 10px rgba(0, 102, 204, 0.3));
+      }
+    }
+
+    @keyframes pulseText {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+
+    /* Media Queries for Small Mobile Devices */
+    @media (max-width: 600px) {
+      .carousel-container {
+        height: 380px;
+      }
+      .card {
+        width: 230px;
+        height: 350px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <!-- Logo Akeed Principal -->
+    <img src="img/Akeed_Logo-Trans.png" alt="Akeed Logo" class="logo">
+    <h1>Catalogue Bornes & TPE</h1>
+    <p>Glissez à gauche ou à droite pour naviguer dans le catalogue</p>
+  </header>
+
+  <!-- Carousel Section -->
+  <div class="carousel-container" id="carousel">
+    <div class="carousel-track" id="track"></div>
+  </div>
+
+  <!-- Modal Popup -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal-content">
+      <button class="close-btn" id="closeModal">&times;</button>
+      <h2 class="modal-title" id="modalTitle">Titre</h2>
+      <div class="modal-body" id="modalBody">Description...</div>
+    </div>
+  </div>
+
+  <!-- Écran de Veille (Screensaver) -->
+  <div class="screensaver" id="screensaver">
+    <div class="screensaver-content">
+      <img src="img/Akeed_Logo-Trans.png" alt="Akeed Logo Screensaver" class="screensaver-logo">
+      <div class="screensaver-text">Touchez l'écran pour commencer</div>
+    </div>
+  </div>
+
+  <!-- Section Akeed -->
+  <section class="akeed-section">
+    <h2>À propos d'Akeed</h2>
+    <p>
+      <strong>Akeed</strong> est un leader dans le développement de solutions technologiques intégrées, spécialisé dans les bornes interactives, les bornes de paiement intelligentes, l'affichage dynamique et les terminaux de point de vente (TPE). Avec son écosystème d'applications innovantes telles qu'<em>Akeed Plus</em>, Akeed transforme l'expérience client et optimise la gestion commerciale et la numérisation des services en Tunisie.
+    </p>
+    <a href="https://www.akeed.tn/" target="_blank" rel="noopener">Visiter le site officiel www.akeed.tn</a>
+  </section>
+
+  <script>
+    const items = [
+      {
+        title: "Borne d'Information Interactive",
+        image: "img/Borne d'Information Interactive.gif",
+        details: `
+          <p><strong>Usage :</strong> Signalétique interactive et consultation d'information.</p>
+          <p><strong>Spécifications techniques :</strong></p>
+          <ul>
+            <li><strong>Écran :</strong> 17 pouces tactile (Orientation Paysage)</li>
+            <li><strong>Hauteur Totale :</strong> 112 cm</li>
+            <li><strong>Largeur :</strong> 42 cm | <strong>Profondeur :</strong> 41 cm</li>
+            <li><strong>Socle :</strong> Hauteur 93 cm, Largeur 15 cm, Base 19 cm</li>
+          </ul>
+        `
+      },
+      {
+        title: "Borne d'Affichage Dynamique",
+        image: "img/Borne d'Affichage Dynamique.gif",
+        details: `
+          <p><strong>Usage :</strong> Diffusion de vidéos publicitaires et catalogue interactif via boutons physiques.</p>
+          <p><strong>Spécifications techniques :</strong></p>
+          <ul>
+            <li><strong>Écran :</strong> LED 55 pouces (Non-tactile, Mode Portrait)</li>
+            <li><strong>Caméra :</strong> Caméra HD intégrée en haut (détection de présence / analyse d'audience)</li>
+            <li><strong>OS :</strong> Android intégré</li>
+            <li><strong>Dimensions :</strong> Hauteur 198 cm, Largeur 80 cm, Base 60 cm</li>
+            <li><strong>Connectivité :</strong> 2x USB, RJ45 Ethernet, Sortie HDMI</li>
+          </ul>
+        `
+      },
+      {
+        title: "LIGHTY Borne de Paiement",
+        image: "img/LIGHTY    Borne de Paiement .gif",
+        details: `
+          <p><strong>Usage :</strong> Borne de paiement et rechargement compacte.</p>
+          <p><strong>Spécifications techniques :</strong></p>
+          <ul>
+            <li><strong>Dimensions :</strong> Hauteur 54 cm, Largeur 28 cm, Profondeur 27.5 cm</li>
+            <li><strong>Interface :</strong> Écran de contrôle et clavier numérique intégré</li>
+            <li><strong>Encaissement :</strong> Accepteur de billets / pièces et système de rendu de monnaie</li>
+          </ul>
+        `
+      },
+      {
+        title: "TPE Bleu (Telpo TPS586)",
+        image: "img/TPE Terminal Point de Vente (TPE Bleu).gif",
+        details: `
+          <p><strong>Usage :</strong> Terminal de paiement & caissier Android tout-en-un.</p>
+          <p><strong>Spécifications techniques :</strong></p>
+          <ul>
+            <li><strong>Application embarquée :</strong> Akeed Plus</li>
+            <li><strong>Écran :</strong> ~8.2 pouces (16 cm x 13.5 cm)</li>
+            <li><strong>OS :</strong> Android 5.1.1 (1 Go RAM / 5.26 Go Flash)</li>
+            <li><strong>Imprimante :</strong> Thermique intégrée pour reçus/tickets</li>
+            <li><strong>Connectivité :</strong> Wi-Fi, GSM (Carte SIM), RJ45, 2x USB</li>
+          </ul>
+        `
+      },
+      {
+        title: "TPE EF60",
+        image: "img/TPE Terminal Point de Vente EF60.gif",
+        details: `
+          <p><strong>Usage :</strong> Terminal de caisse intelligent Tout-en-Un (Smart Mini ECR / Touch POS).</p>
+          <p><strong>Spécifications techniques :</strong></p>
+          <ul>
+            <li><strong>Écran Principal :</strong> 10.1 pouces IPS Tactile Capacitif</li>
+            <li><strong>Afficheur Client :</strong> 4 pouces (Double écran)</li>
+            <li><strong>OS & Performance :</strong> Android 11.0, Quad-Core, 4 Go RAM / 64 Go ROM</li>
+            <li><strong>Imprimante :</strong> Thermique haute vitesse (58/80 mm) avec découpe automatique</li>
+            <li><strong>Ports :</strong> 4x USB, Port Tiroir-Caisse (RJ11/12), RJ45, RS232</li>
+          </ul>
+        `
+      },
+      {
+        title: "TPE Wiseasy WPOS-3",
+        image: "img/TPE Terminal POS Mobile Wiseasy WPOS-3.gif",
+        details: `
+          <p><strong>Usage :</strong> Terminal de paiement mobile Smart POS pour impression de reçus et billetterie.</p>
+          <p><strong>Spécifications techniques :</strong></p>
+          <ul>
+            <li><strong>Écran :</strong> 5.0 pouces Tactile Capacitif + Clavier numérique physique</li>
+            <li><strong>Dimensions :</strong> Hauteur 6 cm, Longueur 19.5 cm, Largeur 8 cm</li>
+            <li><strong>OS :</strong> Android 4.4.2 (KitKat)</li>
+            <li><strong>Périphériques :</strong> Imprimante thermique 58 mm, NFC/Puce, Caméra QR Code</li>
+          </ul>
+        `
+      },
+      {
+        title: "TPE Terminal Wiseasy",
+        image: "img/TPE Terminal Wiseasy.gif",
+        details: `
+          <p><strong>Usage :</strong> Terminal de paiement mobile Smart POS (Telpo TPS390).</p>
+          <p><strong>Spécifications techniques :</strong></p>
+          <ul>
+            <li><strong>Application embarquée :</strong> Akeed Plus</li>
+            <li><strong>Écran :</strong> 5.5 pouces Tactile HD (1280 x 720)</li>
+            <li><strong>OS :</strong> Android 5.1</li>
+            <li><strong>Périphériques :</strong> Imprimante thermique 58 mm, Lecteur NFC/Puce/Bande magnétique, Scanner QR Code</li>
+          </ul>
+        `
+      },
+      {
+        title: "Borne Hôpital",
+        image: "img/BorneHached.png",
+        details: `
+          <p><strong>Usage :</strong> Borne interactive dédiée aux hôpitaux et centres médicaux pour la gestion des rendez-vous, l'orientation des patients et l'enregistrement automatique.</p>
+          <p><strong>Spécifications techniques :</strong></p>
+          <ul>
+            <li><strong>Interface :</strong> Écran tactile haute précision facile à nettoyer</li>
+            <li><strong>Fonctionnalités :</strong> Scanner de cartes/QR Code de rendez-vous, impression de tickets de file d'attente</li>
+            <li><strong>Conception :</strong> Châssis robuste et ergonomique adapté aux milieux hospitaliers</li>
+          </ul>
+        `
+      },
+      {
+        title: "Borne Télépéage Autoroute",
+        image: "img/BorneTelepeage.png",
+        details: `
+          <p><strong>Usage :</strong> Borne de télépéage et de paiement rapide pour les stations d'autoroute.</p>
+          <p><strong>Spécifications techniques :</strong></p>
+          <ul>
+            <li><strong>Paiement :</strong> Intégration TPE sans contact (NFC), cartes d'abonnement et cartes bancaires</li>
+            <li><strong>Résistance :</strong> Boîtier industriel étanche résistant aux intempéries (IP65) et au vandalisme</li>
+            <li><strong>Connectivité :</strong> Module GSM/Ethernet sécurisé pour traitement en temps réel des transactions</li>
+          </ul>
+        `
+      },
+      {
+        title: "Borne Cotton Candy Vending Machine",
+        image: "img/la7yet jady.png",
+        details: `
+          <p><strong>Usage :</strong> Borne automatique de préparation et distribution de barbe à papa avec vitrine transparente.</p>
+          <p><strong>Spécifications techniques :</strong></p>
+          <ul>
+            <li><strong>Design :</strong> Caisson vitré transparent pour observer la fabrication en direct</li>
+            <li><strong>Système :</strong> Sélection automatique via écran interactif et système de paiement autonome</li>
+          </ul>
+        `
+      },
+      {
+        title: "Borne Popcorn Machine Fully",
+        image: "img/chouch.png",
+        details: `
+          <p><strong>Usage :</strong> Borne distributeur automatique de popcorn chaud en libre-service.</p>
+          <p><strong>Spécifications techniques :</strong></p>
+          <ul>
+            <li><strong>Affichage :</strong> Façade en verre résistant avec système d'éclairage interne</li>
+            <li><strong>Fonctionnalités :</strong> Distribution rapide et options de paiement intégrées</li>
+          </ul>
+        `
+      }
+    ];
+
+    // Carousel Logic Responsive
+    const track = document.getElementById('track');
+    let currentIndex = 0;
+
+    function getSpacing() {
+      return window.innerWidth < 600 ? 140 : 180;
+    }
+
+    function renderCards() {
+      track.innerHTML = '';
+      const total = items.length;
+      const spacing = getSpacing();
+
+      items.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.classList.add('card');
+        
+        let diff = index - currentIndex;
+        if (diff < -Math.floor(total / 2)) diff += total;
+        if (diff > Math.floor(total / 2)) diff -= total;
+
+        const absDiff = Math.abs(diff);
+        
+        const translateX = diff * spacing;
+        const scale = 1 - absDiff * 0.15;
+        const opacity = 1 - absDiff * 0.3;
+        const zIndex = 100 - absDiff;
+
+        card.style.transform = `translateX(${translateX}px) scale(${scale})`;
+        card.style.opacity = opacity > 0 ? opacity : 0;
+        card.style.zIndex = zIndex;
+        card.style.pointerEvents = diff === 0 ? 'auto' : 'none';
+
+        card.innerHTML = `
+          <img src="${item.image}" alt="${item.title}">
+          <h3>${item.title}</h3>
+          <button class="btn-detail" onclick="openModal(${index})">Voir Description</button>
+        `;
+
+        track.appendChild(card);
+      });
+    }
+
+    function nextSlide() {
+      currentIndex = (currentIndex + 1) % items.length;
+      renderCards();
+    }
+
+    function prevSlide() {
+      currentIndex = (currentIndex - 1 + items.length) % items.length;
+      renderCards();
+    }
+
+    // Drag / Swipe Gestures
+    let startX = 0;
+    let isDragging = false;
+
+    const carousel = document.getElementById('carousel');
+
+    carousel.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      startX = e.clientX;
+    });
+
+    carousel.addEventListener('mouseup', (e) => {
+      if (!isDragging) return;
+      isDragging = false;
+      const diffX = e.clientX - startX;
+      if (diffX < -40) nextSlide();
+      if (diffX > 40) prevSlide();
+    });
+
+    carousel.addEventListener('mouseleave', () => { isDragging = false; });
+
+    carousel.addEventListener('touchstart', (e) => {
+      startX = e.touches[0].clientX;
+    });
+
+    carousel.addEventListener('touchend', (e) => {
+      const diffX = e.changedTouches[0].clientX - startX;
+      if (diffX < -40) nextSlide();
+      if (diffX > 40) prevSlide();
+    });
+
+    window.addEventListener('resize', renderCards);
+
+    // Modal Logic
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+    const closeModal = document.getElementById('closeModal');
+
+    function openModal(index) {
+      const item = items[index];
+      modalTitle.textContent = item.title;
+      modalBody.innerHTML = item.details;
+      modal.classList.add('active');
+    }
+
+    closeModal.addEventListener('click', () => {
+      modal.classList.remove('active');
+    });
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.classList.remove('active');
+    });
+
+    // Écran de Veille (Screensaver) Logic
+    const screensaver = document.getElementById('screensaver');
+    let idleTimer = null;
+    const IDLE_TIMEOUT = 30000; // 30 secondes
+
+    function showScreensaver() {
+      screensaver.classList.add('active');
+    }
+
+    function hideScreensaver() {
+      if (screensaver.classList.contains('active')) {
+        screensaver.classList.remove('active');
+      }
+      resetIdleTimer();
+    }
+
+    function resetIdleTimer() {
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(showScreensaver, IDLE_TIMEOUT);
+    }
+
+    window.addEventListener('mousemove', resetIdleTimer);
+    window.addEventListener('mousedown', resetIdleTimer);
+    window.addEventListener('keypress', resetIdleTimer);
+    window.addEventListener('touchstart', resetIdleTimer);
+    window.addEventListener('touchmove', resetIdleTimer);
+
+    screensaver.addEventListener('click', hideScreensaver);
+    screensaver.addEventListener('touchstart', hideScreensaver);
+
+    resetIdleTimer();
+    renderCards();
+  </script>
+</body>
+</html>
